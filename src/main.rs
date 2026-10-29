@@ -26,13 +26,13 @@ unsafe fn process(menu_path: &Path, output_dir: &Path, sprites: bool) -> Result<
 
     {
         for tpf_path in tpfs {
-            let (tpf, _) = unsafe { TPF::unpack(&tpf_path)? };
+            let (tpf, _) = unsafe { TPF::read(&tpf_path)? };
             println!("Unpacked TPF: {:?} with {} entries", tpf_path.file_name(), tpf.count());
             textures.extend(tpf.textures);
         }
 
         for sblyt_path in sblyts {
-            let (sblyt, _) = unsafe { LayoutBinder::unpack_binder(&sblyt_path)? };
+            let (sblyt, _) = unsafe { LayoutBinder::read(&sblyt_path)? };
             println!("Unpacked Layout Binder: {:?} with {} entries", sblyt_path.file_name(), sblyt.count());
             layouts.extend(sblyt.entries);
         }
