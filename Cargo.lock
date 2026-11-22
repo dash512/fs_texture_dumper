@@ -238,6 +238,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "fst_dumper"
+version = "0.1.0"
+dependencies = [
+ "Ferrisouls",
+]
+
+[[package]]
 name = "getrandom"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -574,13 +581,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-ident",
-]
-
-[[package]]
-name = "tga_dumper"
-version = "0.1.0"
-dependencies = [
- "Ferrisouls",
 ]
 
 [[package]]

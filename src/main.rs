@@ -104,6 +104,23 @@ fn parse_format(s: &str) -> Option<ImageFormat> {
     }
 }
 
+fn parse_dxgi(s: &str) -> Option<DxgiFormat> {
+    match s.to_ascii_lowercase().as_str() {
+        "bc1_unorm" => Some(DxgiFormat::BC1_UNORM),
+        "bc1_srgb" => Some(DxgiFormat::BC1_UNORM_SRGB),
+        "bc2_unorm" => Some(DxgiFormat::BC2_UNORM),
+        "bc2_srgb" => Some(DxgiFormat::BC2_UNORM_SRGB),
+        "bc3_unorm" => Some(DxgiFormat::BC3_UNORM),
+        "bc3_srgb" => Some(DxgiFormat::BC3_UNORM_SRGB),
+        "bc4" => Some(DxgiFormat::BC4_UNORM),
+        "bc5" => Some(DxgiFormat::BC5_UNORM),
+        "bc6" => Some(DxgiFormat::BC6H_UF16),
+        "bc7_unorm" => Some(DxgiFormat::BC7_UNORM),
+        "bc7_srgb" => Some(DxgiFormat::BC7_UNORM_SRGB),
+        _ => None,
+    }
+}
+
 fn extension(format: &ImageFormat) -> &'static str {
     match format {
         ImageFormat::TGA => "tga",
@@ -117,8 +134,9 @@ fn main() {
     let mut args = env::args().skip(1);
 
     let mut sprites = false;
-    let mut format = ImageFormat::TGA;
-    let mut positional: Vec<PathBuf> = Vec::new();
+    let mut dxgi_format = DxgiFormat::BC7_UNORM;
+    let mut format: ImageFormat = ImageFormat::DDS(DxgiFormat::UNKNOWN);
+    let mut positional: Vec<PathBuf> = Vec::new();  
 
     while let Some(arg) = args.next() {
         if let Some(value) = arg.strip_prefix("--sprites=") {
@@ -134,7 +152,15 @@ fn main() {
             format = match parse_format(value) {
                 Some(f) => f,
                 None => {
-                    eprintln!("Invalid format: {value}. Expected one of: [tga|png|dds]");
+                    eprintln!("Invalid format: {value}. Expected one of: [dds|png|tga]");
+                    std::process::exit(1);
+                }
+            };
+        } else if let Some(value) = arg.strip_prefix("--dxgi=") {
+            dxgi_format = match parse_dxgi(value) {
+                Some(f) => f,
+                None => {
+                    eprintln!("Invalid format: {value}. Expected one of: [BC{{1|2|3|7}}_{{UNORM|SRGB}} | BC4 | BC5 | BC6]");
                     std::process::exit(1);
                 }
             };
@@ -147,7 +173,7 @@ fn main() {
     }
 
     if positional.len() == 0 { //no paths
-        eprintln!("Usage: program <input> [output] [--sprites=yes|no] [--format=tga|png|dds]");
+        eprintln!("Usage: program <input_dir> [output_dir] [--sprites=yes|no] [--format=tga|png|dds]");
         std::process::exit(1);
     }
 
@@ -159,6 +185,11 @@ fn main() {
     } else {
         &positional[1]
     };
+
+    //If image format is dds, set its dxgi format. Defaults to BC7_UNORM
+    if matches!(format, ImageFormat::DDS(_)) {
+        format = ImageFormat::DDS(dxgi_format)
+    }
 
     println!("-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-\nBegin Processing...\n-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-");
 

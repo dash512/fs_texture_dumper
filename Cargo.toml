@@ -1,5 +1,5 @@
 [package]
-name = "tga_dumper"
+name = "fst_dumper"
 version = "0.1.0"
 edition = "2024"
 
